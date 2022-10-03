@@ -4,12 +4,8 @@ py-opinionated-upgrade
 
 An opinionated version of pyupgrade which is a tool (and pre-commit hook) to automatically upgrade syntax for newer
 versions of the language.
-
-## Installation
-
-```bash
-pip install pyupgrade
-```
+- The main change is that `"r"` should not be removed from `open("foo", "r")` as this is
+  for verbosity and is not necessarily an upgrade.  
 
 ## As a pre-commit hook
 
@@ -18,10 +14,10 @@ See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions
 Sample `.pre-commit-config.yaml`:
 
 ```yaml
--   repo: https://github.com/asottile/pyupgrade
-    rev: v2.38.2
+-   repo: https://github.com/nmichlo/py-opinionated-upgrade
+    rev: c2.38.2
     hooks:
-    -   id: pyupgrade
+    -   id: py-opinionated-upgrade
 ```
 
 ## Implemented features
@@ -550,19 +546,19 @@ Availability:
 
 ```diff
 -open("foo", "U")
-+open("foo")
++open("foo", "r")
 -open("foo", "Ur")
-+open("foo")
++open("foo", "r")
 -open("foo", "Ub")
 +open("foo", "rb")
 -open("foo", "rUb")
 +open("foo", "rb")
 -open("foo", "r")
-+open("foo")
++open("foo", "r")
 -open("foo", "rt")
-+open("foo")
--open("f", "r", encoding="UTF-8")
-+open("f", encoding="UTF-8")
++open("foo", "r")
+-open("f", "tr", encoding="UTF-8")
++open("f", "r", encoding="UTF-8")
 ```
 
 
