@@ -1,11 +1,8 @@
-[![Build Status](https://dev.azure.com/asottile/asottile/_apis/build/status/asottile.pyupgrade?branchName=main)](https://dev.azure.com/asottile/asottile/_build/latest?definitionId=2&branchName=main)
-[![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/asottile/asottile/2/main.svg)](https://dev.azure.com/asottile/asottile/_build/latest?definitionId=2&branchName=main)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/asottile/pyupgrade/main.svg)](https://results.pre-commit.ci/latest/github/asottile/pyupgrade/main)
 
-pyupgrade
+py-opinionated-upgrade
 =========
 
-A tool (and pre-commit hook) to automatically upgrade syntax for newer
+An opinionated version of pyupgrade which is a tool (and pre-commit hook) to automatically upgrade syntax for newer
 versions of the language.
 
 ## Installation
