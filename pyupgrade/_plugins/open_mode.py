@@ -14,13 +14,13 @@ from pyupgrade._ast_helpers import has_starargs
 from pyupgrade._data import register
 from pyupgrade._data import State
 from pyupgrade._data import TokenFunc
-from pyupgrade._token_helpers import delete_argument
 from pyupgrade._token_helpers import find_open_paren
 from pyupgrade._token_helpers import parse_call_args
 
-U_MODE_REMOVE = frozenset(('U', 'Ur', 'rU', 'r', 'rt', 'tr'))
-U_MODE_REPLACE_R = frozenset(('Ub', 'bU'))
-U_MODE_REMOVE_U = frozenset(('rUb', 'Urb', 'rbU', 'Ubr', 'bUr', 'brU'))
+T_MODE_REMOVE_T = frozenset(('rt', 'tr'))
+U_MODE_REPLACE_R = frozenset(('Ub', 'bU', 'U'))
+U_MODE_REMOVE_U = frozenset(('rUb', 'Urb', 'rbU', 'Ubr', 'bUr', 'brU', 'Ur', 'rU'))
+T_MODE_REPLACE = T_MODE_REMOVE_T
 U_MODE_REPLACE = U_MODE_REPLACE_R | U_MODE_REMOVE_U
 
 
@@ -35,13 +35,14 @@ def _fix_open_mode(i: int, tokens: list[Token], *, arg_idx: int) -> None:
     mode = tokens_to_src(tokens[slice(*func_args[arg_idx])])
     mode_stripped = mode.split('=')[-1]
     mode_stripped = ast.literal_eval(mode_stripped.strip())
-    if mode_stripped in U_MODE_REMOVE:
-        delete_argument(arg_idx, tokens, func_args)
-    elif mode_stripped in U_MODE_REPLACE_R:
+    if mode_stripped in U_MODE_REPLACE_R:
         new_mode = mode.replace('U', 'r')
         tokens[slice(*func_args[arg_idx])] = [Token('SRC', new_mode)]
     elif mode_stripped in U_MODE_REMOVE_U:
         new_mode = mode.replace('U', '')
+        tokens[slice(*func_args[arg_idx])] = [Token('SRC', new_mode)]
+    elif mode_stripped in T_MODE_REMOVE_T:
+        new_mode = mode.replace('t', '')
         tokens[slice(*func_args[arg_idx])] = [Token('SRC', new_mode)]
     else:
         raise AssertionError(f'unreachable: {mode!r}')
@@ -71,7 +72,7 @@ def visit_Call(
         if len(node.args) >= 2 and isinstance(node.args[1], ast.Str):
             if (
                 node.args[1].s in U_MODE_REPLACE or
-                (len(node.args) == 2 and node.args[1].s in U_MODE_REMOVE)
+                node.args[1].s in T_MODE_REPLACE
             ):
                 func = functools.partial(
                     _fix_open_mode,
@@ -91,8 +92,8 @@ def visit_Call(
                 mode is not None and
                 isinstance(mode.value, ast.Str) and
                 (
-                    mode.value.s in U_MODE_REMOVE or
-                    mode.value.s in U_MODE_REPLACE
+                    mode.value.s in U_MODE_REPLACE or
+                    mode.value.s in T_MODE_REPLACE
                 )
             ):
                 func = functools.partial(
