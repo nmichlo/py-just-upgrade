@@ -1,21 +1,33 @@
-py-opinionated-upgrade
+py-just-upgrade
 =========
 
-An opinionated version of pyupgrade which is a tool (and pre-commit hook) to automatically upgrade syntax for newer
-versions of the language.
+A fork of pyupgrade that aims to remove formatting only changes - pyupgrade is an opinionated formatting tool that
+automatically upgrades syntax for newer versions of the language.
 
 <a href="https://github.com/asottile/pyupgrade/issues/714">
-  <p align="center">
-    ⚠️ <b>NOTE</b>: this is an opinionated tool ⚠️
-  </p>
   <p align="center">
     <img src="inspiration.png" width="512"/>
   </p>
 </a>
 
 <p align="center">
-This fork disables the removal of <code>"r"</code> from <code>open("foo", "r")</code>
+The goal of this fork is that as far as possible it should only upgrade language syntax and aim to avoid otherwise opinionated formatting, unless the change generally results in a performance improvement.
+<br>
+<i><b>Please submit an issue if you beleive there is an inconsistency with this fork.</b></i>
 </p>
+
+**Current Fork Changes**:
+- [x] disabled the removal of <code>"r"</code> from <code>open("foo", "r")</code>
+- [ ] disabled removal of `"utf-8"` from `.encode("utf-8")`
+- [ ] remove parentheses from `@functools.lru_cache()`
+- [ ] replace `@functools.lru_cache(maxsize=None)` with shorthand
+- [ ] remove unnecessary abspath
+- [ ] remove quoted annotations
+
+**Investigate Changes**:
+- [ ] Set literals
+- [ ] Octal literals
+- [ ] forced str literals
 
 ## As a pre-commit hook
 
