@@ -15,6 +15,7 @@ from pyupgrade._ast_helpers import has_starargs
 from pyupgrade._data import register
 from pyupgrade._data import State
 from pyupgrade._data import TokenFunc
+from pyupgrade._token_helpers import delete_argument
 from pyupgrade._token_helpers import find_open_paren
 from pyupgrade._token_helpers import parse_call_args
 
@@ -27,10 +28,16 @@ def _permute(*args: str) -> tuple[str, ...]:
     return tuple(''.join(p) for s in args for p in itertools.permutations(s))
 
 
-MODE_REMOVE = frozenset(_permute('U', 'r', 'rU', 'rt'))
-MODE_REPLACE_R = frozenset(_permute('Ub'))
-MODE_REMOVE_T = frozenset(_plus(_permute('at', 'rt', 'wt', 'xt')))
-MODE_REMOVE_U = frozenset(_permute('rUb'))
+# -- the original replacement sets --
+# MODE_REMOVE = frozenset(_permute('U', 'r', 'rU', 'rt'))
+# MODE_REPLACE_R = frozenset(_permute('Ub'))
+# MODE_REMOVE_T = frozenset(_plus(_permute('at', 'rt', 'wt', 'xt')))
+# MODE_REMOVE_U = frozenset(_permute('rUb'))
+
+MODE_REMOVE = frozenset()
+MODE_REPLACE_R = frozenset(_permute('Ub', 'U'))
+MODE_REMOVE_T = frozenset(_plus(_permute('at', 'rt', 'wt', 'xt', 'rt')))
+MODE_REMOVE_U = frozenset(_permute('rUb', 'rU'))
 MODE_REPLACE = MODE_REPLACE_R | MODE_REMOVE_T | MODE_REMOVE_U
 
 
@@ -55,9 +62,6 @@ def _fix_open_mode(i: int, tokens: list[Token], *, arg_idx: int) -> None:
         tokens[slice(*func_args[arg_idx])] = [Token('SRC', new_mode)]
     elif mode_stripped in MODE_REMOVE_U:
         new_mode = mode.replace('U', '')
-        tokens[slice(*func_args[arg_idx])] = [Token('SRC', new_mode)]
-    elif mode_stripped in T_MODE_REMOVE_T:
-        new_mode = mode.replace('t', '')
         tokens[slice(*func_args[arg_idx])] = [Token('SRC', new_mode)]
     else:
         raise AssertionError(f'unreachable: {mode!r}')
