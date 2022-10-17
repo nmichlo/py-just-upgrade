@@ -21,13 +21,12 @@ from pyupgrade._token_helpers import has_space_before
 from pyupgrade._token_helpers import indented_amount
 
 # GENERATED VIA generate-imports
-# Using reorder-python-imports==3.8.3
+# Using reorder-python-imports==3.8.4
 REMOVALS = {
-    (2, 7): {'__future__': {'generators', 'nested_scopes', 'with_statement'}},
     (3,): {
         '__future__': {
-            'absolute_import', 'division', 'print_function',
-            'unicode_literals',
+            'absolute_import', 'division', 'generators', 'nested_scopes',
+            'print_function', 'unicode_literals', 'with_statement',
         },
         'builtins': {
             '*', 'ascii', 'bytes', 'chr', 'dict', 'filter', 'hex', 'input',
@@ -157,7 +156,6 @@ REPLACE_EXACT = {
     (3, 10): {
         ('typing', 'Callable'): 'collections.abc',
         ('typing_extensions', 'Concatenate'): 'typing',
-        ('typing_extensions', 'ParamSpec'): 'typing',
         ('typing_extensions', 'ParamSpecArgs'): 'typing',
         ('typing_extensions', 'ParamSpecKwargs'): 'typing',
         ('typing_extensions', 'TypeAlias'): 'typing',
@@ -244,15 +242,13 @@ def _for_version(
         if ver <= version:
             exact.update(ver_exact)
 
-    mods = {}
-    if version >= (3,):
-        mods.update(REPLACE_MODS)
-        if not keep_mock:
-            exact['mock', 'mock'] = 'unittest'
-            mods.update({
-                'mock': 'unittest.mock',
-                'mock.mock': 'unittest.mock',
-            })
+    mods = {**REPLACE_MODS}
+    if not keep_mock:
+        exact['mock', 'mock'] = 'unittest'
+        mods.update({
+            'mock': 'unittest.mock',
+            'mock.mock': 'unittest.mock',
+        })
 
     return removals, exact, mods
 
