@@ -36,10 +36,10 @@ See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions
 Sample `.pre-commit-config.yaml`:
 
 ```yaml
--   repo: https://github.com/nmichlo/py-opinionated-upgrade
+-   repo: https://github.com/nmichlo/py-just-upgrade
     rev: c2.38.2
     hooks:
-    -   id: py-opinionated-upgrade
+    -   id: pyupgrade
 ```
 
 ## Implemented features
