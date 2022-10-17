@@ -17,7 +17,9 @@ The goal of this fork is that as far as possible it should only upgrade language
 </p>
 
 **New Features**:
-This fork enables selective disabling of plugins
+
+This fork enables selective enabling or disabling of plugins:
+
 - Simply pass in the arguments `--enabled-plugins` or `--disabled-plugins` to
   activate or de-active features. NOTE: only one of these can be specified
   at any one time. These arguments are mutually exclusive!
