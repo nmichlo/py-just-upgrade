@@ -76,6 +76,47 @@ def test_keep_percent_format(tmpdir):
     assert f.read() == '"{}".format(1)'
 
 
+def test_enable_plugins(tmpdir):
+    f = tmpdir.join('f.py')
+    f_contents = '"asdf".encode("utf-8")\nopen("asdf", "Ur")'
+
+    # enable hard coded plugin
+    f.write(f_contents)
+    main((f.strpath, '--enabled-plugins', 'encode_to_binary'))
+    assert f.read() == 'b"asdf"\nopen("asdf", "Ur")'
+
+    # enable standard plugin
+    f.write(f_contents)
+    main((f.strpath, '--enabled-plugins', 'open_mode'))
+    assert f.read() == '"asdf".encode("utf-8")\nopen("asdf", "r")'
+
+    # disable hard coded plugin
+    f.write(f_contents)
+    main((f.strpath, '--disabled-plugins', 'encode_to_binary'))
+    assert f.read() == '"asdf".encode()\nopen("asdf", "r")'
+    f.write(f_contents)
+    main((f.strpath, '--disabled-plugins', 'encode_to_binary', 'default_encoding'))
+    assert f.read() == '"asdf".encode("utf-8")\nopen("asdf", "r")'
+
+    # disable standard plugin
+    f.write(f_contents)
+    main((f.strpath, '--disabled-plugins', 'open_mode'))
+    assert f.read() == 'b"asdf"\nopen("asdf", "Ur")'
+
+    # enable both
+    f.write(f_contents)
+    main((f.strpath, '--enabled-plugins', 'encode_to_binary', 'open_mode'))
+    assert f.read() == 'b"asdf"\nopen("asdf", "r")'
+
+    # disable both
+    f.write(f_contents)
+    main((f.strpath, '--disabled-plugins', 'encode_to_binary', 'open_mode'))
+    assert f.read() == '"asdf".encode()\nopen("asdf", "Ur")'
+    f.write(f_contents)
+    main((f.strpath, '--disabled-plugins', 'encode_to_binary', 'default_encoding', 'open_mode'))
+    assert f.read() == '"asdf".encode("utf-8")\nopen("asdf", "Ur")'
+
+
 def test_keep_mock(tmpdir):
     f = tmpdir.join('f.py')
     f.write('from mock import patch\n')

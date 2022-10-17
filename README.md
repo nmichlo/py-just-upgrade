@@ -16,15 +16,21 @@ The goal of this fork is that as far as possible it should only upgrade language
 <i><b>Please submit an issue if you beleive there is an inconsistency with this fork.</b></i>
 </p>
 
+**New Features**:
+This fork enables selective disabling of plugins
+- Simply pass in the arguments `--enabled-plugins` or `--disabled-plugins` to
+  activate or de-active features. NOTE: only one of these can be specified
+  at any one time. These arguments are mutually exclusive!
+
 **Current Fork Changes**:
 - [x] disabled the removal of <code>"r"</code> from <code>open("foo", "r")</code>
+
+**Investigate Changes**:
 - [ ] disabled removal of `"utf-8"` from `.encode("utf-8")`
 - [ ] remove parentheses from `@functools.lru_cache()`
 - [ ] replace `@functools.lru_cache(maxsize=None)` with shorthand
 - [ ] remove unnecessary abspath
 - [ ] remove quoted annotations
-
-**Investigate Changes**:
 - [ ] Set literals
 - [ ] Octal literals
 - [ ] forced str literals

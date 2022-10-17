@@ -18,7 +18,7 @@ from tokenize_rt import tokens_to_src
 from tokenize_rt import UNIMPORTANT_WS
 
 from pyupgrade._ast_helpers import ast_parse
-from pyupgrade._data import FUNCS
+from pyupgrade._data import PLUGIN_FUNCS
 from pyupgrade._data import Settings
 from pyupgrade._data import visit
 from pyupgrade._string_helpers import DotFormatPart
@@ -59,7 +59,7 @@ def _fix_plugins(contents_text: str, settings: Settings) -> str:
     except SyntaxError:
         return contents_text
 
-    callbacks = visit(FUNCS, ast_obj, settings)
+    callbacks = visit(PLUGIN_FUNCS, ast_obj, settings)
 
     if not callbacks:
         return contents_text
@@ -276,20 +276,40 @@ def _fix_encode_to_binary(tokens: list[Token], i: int) -> None:
     del tokens[victims]
 
 
-def _fix_tokens(contents_text: str) -> str:
+HARD_CODED_PLUGINS = [
+    'escape_sequences',
+    'extraneous_parens',
+    'format_literals',
+    'encode_to_binary',
+]
+
+# add non standard plugins
+for k in HARD_CODED_PLUGINS:
+    assert k not in PLUGIN_FUNCS
+    PLUGIN_FUNCS[k] = []
+
+
+def _fix_tokens(contents_text: str, settings: Settings = None) -> str:
+    if settings is None:
+        settings = Settings()
+
     try:
         tokens = src_to_tokens(contents_text)
     except tokenize.TokenError:
         return contents_text
     for i, token in reversed_enumerate(tokens):
         if token.name == 'STRING':
-            tokens[i] = _fix_escape_sequences(_remove_u_prefix(tokens[i]))
+            if settings.is_plugin_enabled('escape_sequences'):
+                tokens[i] = _fix_escape_sequences(_remove_u_prefix(tokens[i]))
         elif token.src == '(':
-            _fix_extraneous_parens(tokens, i)
+            if settings.is_plugin_enabled('extraneous_parens'):
+                _fix_extraneous_parens(tokens, i)
         elif token.src == 'format' and i > 0 and tokens[i - 1].src == '.':
-            _fix_format_literal(tokens, i - 2)
+            if settings.is_plugin_enabled('format_literals'):
+                _fix_format_literal(tokens, i - 2)
         elif token.src == 'encode' and i > 0 and tokens[i - 1].src == '.':
-            _fix_encode_to_binary(tokens, i)
+            if settings.is_plugin_enabled('encode_to_binary'):
+                _fix_encode_to_binary(tokens, i)
         elif (
                 token.utf8_byte_offset == 0 and
                 token.line < 3 and
@@ -315,16 +335,24 @@ def _fix_file(filename: str, args: argparse.Namespace) -> int:
         print(f'{filename} is non-utf-8 (not supported)')
         return 1
 
+    settings = Settings(
+        min_version=args.min_version,
+        keep_percent_format=args.keep_percent_format,
+        keep_mock=args.keep_mock,
+        keep_runtime_typing=args.keep_runtime_typing,
+        enabled_plugins=set(args.enabled_plugins) if args.enabled_plugins else None,
+        disabled_plugins=set(args.disabled_plugins) if args.disabled_plugins else None,
+    )
+
     contents_text = _fix_plugins(
         contents_text,
-        settings=Settings(
-            min_version=args.min_version,
-            keep_percent_format=args.keep_percent_format,
-            keep_mock=args.keep_mock,
-            keep_runtime_typing=args.keep_runtime_typing,
-        ),
+        settings=settings,
     )
-    contents_text = _fix_tokens(contents_text)
+
+    contents_text = _fix_tokens(
+        contents_text,
+        settings=settings,
+    )
 
     if filename == '-':
         print(contents_text, end='')
@@ -373,6 +401,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         '--py311-plus',
         action='store_const', dest='min_version', const=(3, 11),
+    )
+    parser.add_argument(
+        '--enabled-plugins',
+        nargs='+', type=str, default=None,
+    )
+    parser.add_argument(
+        '--disabled-plugins',
+        nargs='+', type=str, default=None,
     )
     args = parser.parse_args(argv)
 
