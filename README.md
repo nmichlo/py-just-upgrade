@@ -43,7 +43,7 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 -   repo: https://github.com/nmichlo/py-just-upgrade
-    rev: c2.38.2
+    rev: c3.1.0
     hooks:
     -   id: pyupgrade
 ```
