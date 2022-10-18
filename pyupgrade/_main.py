@@ -403,12 +403,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         action='store_const', dest='min_version', const=(3, 11),
     )
     parser.add_argument(
-        '--enabled-plugins',
-        nargs='+', type=str, default=None,
+        '--enable-plugin', '-e', dest='enabled_plugins',
+        action='append', type=str, default=None,
     )
     parser.add_argument(
-        '--disabled-plugins',
-        nargs='+', type=str, default=None,
+        '--disable-plugin', '-d', dest='disabled_plugins',
+        action='append', type=str, default=None,
     )
     args = parser.parse_args(argv)
 

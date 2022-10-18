@@ -82,38 +82,38 @@ def test_enable_plugins(tmpdir):
 
     # enable hard coded plugin
     f.write(f_contents)
-    main((f.strpath, '--enabled-plugins', 'encode_to_binary'))
+    main((f.strpath, '--enable-plugin', 'encode_to_binary'))
     assert f.read() == 'b"asdf"\nopen("asdf", "Ur")'
 
     # enable standard plugin
     f.write(f_contents)
-    main((f.strpath, '--enabled-plugins', 'open_mode'))
+    main((f.strpath, '--enable-plugin', 'open_mode'))
     assert f.read() == '"asdf".encode("utf-8")\nopen("asdf", "r")'
 
     # disable hard coded plugin
     f.write(f_contents)
-    main((f.strpath, '--disabled-plugins', 'encode_to_binary'))
+    main((f.strpath, '--disable-plugin', 'encode_to_binary'))
     assert f.read() == '"asdf".encode()\nopen("asdf", "r")'
     f.write(f_contents)
-    main((f.strpath, '--disabled-plugins', 'encode_to_binary', 'default_encoding'))
+    main((f.strpath, '--disable-plugin', 'encode_to_binary', '-d', 'default_encoding'))
     assert f.read() == '"asdf".encode("utf-8")\nopen("asdf", "r")'
 
     # disable standard plugin
     f.write(f_contents)
-    main((f.strpath, '--disabled-plugins', 'open_mode'))
+    main((f.strpath, '--disable-plugin', 'open_mode'))
     assert f.read() == 'b"asdf"\nopen("asdf", "Ur")'
 
     # enable both
     f.write(f_contents)
-    main((f.strpath, '--enabled-plugins', 'encode_to_binary', 'open_mode'))
+    main((f.strpath, '--enable-plugin', 'encode_to_binary', '-e', 'open_mode'))
     assert f.read() == 'b"asdf"\nopen("asdf", "r")'
 
     # disable both
     f.write(f_contents)
-    main((f.strpath, '--disabled-plugins', 'encode_to_binary', 'open_mode'))
+    main((f.strpath, '--disable-plugin', 'encode_to_binary', '-d', 'open_mode'))
     assert f.read() == '"asdf".encode()\nopen("asdf", "Ur")'
     f.write(f_contents)
-    main((f.strpath, '--disabled-plugins', 'encode_to_binary', 'default_encoding', 'open_mode'))
+    main((f.strpath, '--disable-plugin', 'encode_to_binary', '-d', 'default_encoding', '-d', 'open_mode'))
     assert f.read() == '"asdf".encode("utf-8")\nopen("asdf", "Ur")'
 
 
